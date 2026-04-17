@@ -165,43 +165,35 @@ input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
 .crew-norole{font-size:11px;color:var(--text3);margin-top:4px}
 
 /* ── MOMENTS ── */
-.moments-empty{background:var(--bg2);border:1px dashed var(--line2);border-radius:14px;padding:40px 20px;text-align:center}
-.moments-empty p{font-size:12px;color:var(--text3);line-height:1.8;margin-bottom:16px}
-.upload-btn-big{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:4px;border:1px solid var(--line2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;letter-spacing:0.8px;text-transform:uppercase;transition:all 0.2s;font-family:'DM Sans','Noto Sans KR',sans-serif}
-.upload-btn-big:hover{border-color:var(--accent2);color:var(--accent)}
-
-/* slideshow */
-.slideshow-wrap{position:relative;width:100%;border-radius:14px;overflow:hidden;background:var(--bg2);border:1px solid var(--line)}
-.slides{display:flex;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);will-change:transform}
-.slide{flex:0 0 100%;position:relative}
-.slide img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-.slide-caption{padding:14px 16px 16px;background:var(--bg2)}
-.slide-author{font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
-.slide-comment{font-size:13px;color:var(--text2);line-height:1.6}
-.slide-del{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.55);border:none;color:var(--text2);font-size:16px;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.18s}
-.slide-del:hover{background:rgba(200,0,0,0.5);color:#fff}
-
-/* dots */
-.slide-dots{display:flex;justify-content:center;gap:6px;padding:12px 0 4px}
-.dot{width:5px;height:5px;border-radius:50%;background:var(--line3);cursor:pointer;transition:background 0.2s,transform 0.2s}
-.dot.active{background:var(--accent);transform:scale(1.3)}
-
-/* nav arrows */
-.slide-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.45);border:none;color:var(--text2);font-size:18px;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.18s;z-index:2;margin-top:-20px}
-.slide-nav:hover{background:rgba(0,0,0,0.75);color:var(--text)}
-.slide-nav.prev{left:10px}
-.slide-nav.next{right:10px}
-.slide-count{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.55);color:var(--text2);font-size:10px;letter-spacing:1px;padding:3px 9px;border-radius:2px}
-
-/* add photo bottom bar */
-.moments-bar{display:flex;gap:8px;margin-top:14px;align-items:stretch}
-.moments-bar input[type=text]{flex:1;min-width:0;padding:9px 12px;border-radius:4px;border:1px solid var(--line2);font-size:12px;color:var(--text);background:var(--bg3);outline:none;font-family:'DM Sans','Noto Sans KR',sans-serif;transition:border-color 0.18s}
-.moments-bar input[type=text]:focus{border-color:var(--line3)}
-.moments-bar input[type=text]::placeholder{color:var(--text3)}
-.moments-bar label{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:4px;border:1px solid var(--accent2);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;letter-spacing:0.5px;white-space:nowrap;transition:background 0.18s}
-.moments-bar label:hover{background:rgba(200,184,154,0.07)}
-.moments-bar input[type=file]{display:none}
-.moments-limit{font-size:10px;color:var(--text3);text-align:right;margin-top:6px;letter-spacing:0.5px}
+.m-form{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:20px}
+.m-form-title{font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.m-field{width:100%;padding:9px 12px;border-radius:4px;border:1px solid var(--line2);font-size:13px;color:var(--text);background:var(--bg3);outline:none;font-family:'DM Sans','Noto Sans KR',sans-serif;margin-bottom:8px;display:block;transition:border-color 0.18s}
+.m-field:focus{border-color:var(--line3)}
+.m-field::placeholder{color:var(--text3)}
+.m-actions{display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap}
+.m-file-label{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:4px;border:1px solid var(--line2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;letter-spacing:0.5px;transition:all 0.18s;white-space:nowrap}
+.m-file-label:hover{border-color:var(--line3);color:var(--text)}
+.m-file-label input{display:none}
+.m-file-name{font-size:11px;color:var(--text3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-submit{padding:9px 20px;border-radius:4px;border:1px solid var(--accent2);background:transparent;color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;letter-spacing:0.5px;transition:background 0.18s;white-space:nowrap}
+.m-submit:hover{background:rgba(200,184,154,0.08)}
+.m-submit:disabled{opacity:0.35;cursor:not-allowed}
+.m-limit{font-size:10px;color:var(--text3);text-align:right;margin-top:8px;letter-spacing:0.5px}
+.m-uploading{display:none;align-items:center;gap:8px;font-size:12px;color:var(--text3);margin-top:10px}
+.m-uploading.show{display:flex}
+.m-spinner{width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.m-grid{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.m-card{background:var(--bg2);display:flex;position:relative;transition:background 0.18s}
+.m-card:hover{background:var(--bg3)}
+.m-card img{width:110px;height:110px;object-fit:cover;flex-shrink:0;display:block}
+.m-card-body{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
+.m-card-author{font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.m-card-comment{font-size:13px;color:var(--text2);line-height:1.6}
+.m-card-time{font-size:10px;color:var(--text3);margin-top:6px}
+.m-card-del{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.5);border:none;color:var(--text3);font-size:13px;width:24px;height:24px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s}
+.m-card-del:hover{background:rgba(160,30,30,0.75);color:#fff}
+.m-empty{background:var(--bg2);border:1px dashed var(--line2);border-radius:14px;padding:40px 20px;text-align:center;color:var(--text3);font-size:12px;line-height:1.9}
 </style>
 </head>
 <body>
@@ -347,32 +339,27 @@ input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
 
 <!-- MOMENTS -->
 <div class="page" id="page-moments">
-  <div id="moments-empty" class="moments-empty">
-    <p>아직 올라온 사진이 없어요.<br>캠핑이 끝나고 소중한 순간들을 올려주세요 📷</p>
-    <label class="upload-btn-big">
-      <span>＋</span> 사진 추가
-      <input type="file" accept="image/*" multiple onchange="handleUpload(this)">
-    </label>
+  <div class="m-form" id="m-form">
+    <div class="m-form-title">새 사진 올리기</div>
+    <input class="m-field" id="m-author" placeholder="이름" oninput="updateSubmitBtn()">
+    <input class="m-field" id="m-comment" placeholder="한줄 후기를 남겨주세요...">
+    <div class="m-actions">
+      <label class="m-file-label">
+        📷 사진 선택
+        <input type="file" accept="image/*" multiple id="m-file-input" onchange="onFileSelect(this)">
+      </label>
+      <span class="m-file-name" id="m-file-name">선택된 파일 없음</span>
+      <button class="m-submit" id="m-submit" onclick="submitMoment()" disabled>올리기</button>
+    </div>
+    <div class="m-uploading" id="m-uploading">
+      <div class="m-spinner"></div>
+      <span>업로드 중...</span>
+    </div>
+    <div class="m-limit" id="m-limit">0 / 10</div>
   </div>
-  <div id="moments-viewer" style="display:none">
-    <div class="slideshow-wrap">
-      <div class="slides" id="slides"></div>
-      <button class="slide-nav prev" onclick="prevSlide()">&#8249;</button>
-      <button class="slide-nav next" onclick="nextSlide()">&#8250;</button>
-      <div class="slide-count" id="slide-count">1 / 1</div>
-    </div>
-    <div class="slide-dots" id="slide-dots"></div>
-    <div id="moments-add">
-      <div class="moments-bar">
-        <input type="text" id="new-author" placeholder="이름" style="max-width:90px;flex:0 0 auto">
-        <input type="text" id="new-comment" placeholder="한줄 후기 입력...">
-        <label>
-          <span>＋</span> 사진
-          <input type="file" accept="image/*" multiple onchange="handleUpload(this)">
-        </label>
-      </div>
-      <div class="moments-limit" id="moments-limit">0 / 10</div>
-    </div>
+  <div class="m-grid" id="m-grid"></div>
+  <div class="m-empty" id="m-empty" style="display:none">
+    아직 올라온 사진이 없어요.<br>캠핑의 소중한 순간들을 올려주세요 📷
   </div>
 </div>
 
@@ -391,6 +378,7 @@ function go(t){
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+t).classList.add('active');
   if(t==='crew')renderCrew();
+  if(t==='moments')loadPhotos();
   if(t==='moments'){loadPhotos();}
 }
 function rls(k,d){try{return JSON.parse(localStorage.getItem(k)||d);}catch(e){return JSON.parse(d);}}
@@ -491,9 +479,8 @@ function copyAcct(){navigator.clipboard.writeText('토스뱅크 1001-7772-4446 �
 
 /* ── CLOUDINARY + FIRESTORE CONFIG ── */
 const CLOUD_NAME='dslqrtzsw';
-const UPLOAD_PRESET='retreat_moments'; /* Cloudinary unsigned preset 이름 */
+const UPLOAD_PRESET='retreat_moments';
 
-/* Firebase config — 아래 값을 본인 Firebase 설정으로 교체하세요 */
 const FIREBASE_CONFIG={
   apiKey:"AIzaSyCAm29apNN1-1ywOynxwQZ7SpVeCHi15IE",
   authDomain:"retreat-note.firebaseapp.com",
@@ -514,39 +501,63 @@ function initFirebase(){
 }
 
 /* ── MOMENTS STATE ── */
-let photos=[];
-let curSlide=0;
+let momentsList=[];
 
-/* load photos from Firestore */
+/* 사진 목록 로드 */
 async function loadPhotos(){
   initFirebase();
-  if(!db)return;
+  if(!db){renderGrid();return;}
   try{
     const snap=await db.collection('moments').orderBy('createdAt','asc').get();
-    photos=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderMoments();
+    momentsList=snap.docs.map(d=>({id:d.id,...d.data()}));
   }catch(e){console.warn('load fail',e);}
+  renderGrid();
 }
 
-/* upload to Cloudinary → save URL to Firestore */
-async function handleUpload(input){
-  const files=Array.from(input.files);
-  const remaining=10-photos.length;
+/* 파일 선택했을 때 미리보기 이름 표시 + 올리기 버튼 활성화 */
+function onFileSelect(input){
+  const nameEl=document.getElementById('m-file-name');
+  const btn=document.getElementById('m-submit');
+  if(input.files.length>0){
+    nameEl.textContent=input.files.length===1?input.files[0].name:`${input.files.length}개 선택됨`;
+    updateSubmitBtn();
+  } else {
+    nameEl.textContent='선택된 파일 없음';
+    btn.disabled=true;
+  }
+}
+
+function updateSubmitBtn(){
+  const author=document.getElementById('m-author').value.trim();
+  const fileInput=document.getElementById('m-file-input');
+  const btn=document.getElementById('m-submit');
+  btn.disabled=!(author && fileInput.files.length>0);
+}
+
+/* 올리기 버튼 클릭 */
+async function submitMoment(){
+  const author=document.getElementById('m-author').value.trim();
+  const comment=document.getElementById('m-comment').value.trim();
+  const fileInput=document.getElementById('m-file-input');
+  const files=Array.from(fileInput.files);
+
+  if(!author){alert('이름을 입력해주세요!');return;}
+  if(!files.length){alert('사진을 선택해주세요!');return;}
+  if(momentsList.length>=10){alert('사진은 최대 10장까지 올릴 수 있어요.');return;}
+
+  const remaining=10-momentsList.length;
   const toAdd=files.slice(0,remaining);
-  if(!toAdd.length)return;
 
-  const author=document.getElementById('new-author')?document.getElementById('new-author').value.trim():'';
-  const comment=document.getElementById('new-comment')?document.getElementById('new-comment').value.trim():'';
-
-  /* show loading state */
-  const btn=input.closest('label');
-  if(btn){btn.textContent='올리는 중...';btn.style.opacity='0.6';}
+  /* UI: 업로드 중 상태 */
+  const btn=document.getElementById('m-submit');
+  const uploading=document.getElementById('m-uploading');
+  btn.disabled=true;
+  uploading.classList.add('show');
 
   initFirebase();
 
   for(const file of toAdd){
     try{
-      /* 1. Cloudinary upload */
       const fd=new FormData();
       fd.append('file',file);
       fd.append('upload_preset',UPLOAD_PRESET);
@@ -554,11 +565,10 @@ async function handleUpload(input){
       const data=await res.json();
       if(!data.secure_url)throw new Error('upload failed');
 
-      /* 2. Save to Firestore */
       if(db){
         await db.collection('moments').add({
           url:data.secure_url,
-          author:author||'',
+          author:author,
           comment:comment||'',
           createdAt:firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -568,60 +578,54 @@ async function handleUpload(input){
     }
   }
 
-  if(document.getElementById('new-comment'))document.getElementById('new-comment').value='';
-  input.value='';
-  await loadPhotos();
+  /* 초기화 */
+  document.getElementById('m-author').value='';
+  document.getElementById('m-comment').value='';
+  document.getElementById('m-file-name').textContent='선택된 파일 없음';
+  fileInput.value='';
+  uploading.classList.remove('show');
+  btn.disabled=true;
 
-  if(btn){btn.innerHTML='<span>＋</span> 사진';btn.style.opacity='1';}
+  await loadPhotos();
 }
 
-/* delete */
-async function deleteSlide(id){
+/* 삭제 */
+async function deleteMoment(id){
   if(!confirm('이 사진을 삭제할까요?'))return;
   initFirebase();
   if(db){try{await db.collection('moments').doc(id).delete();}catch(e){console.warn(e);}}
   await loadPhotos();
 }
 
-function renderMoments(){
-  const empty=document.getElementById('moments-empty');
-  const viewer=document.getElementById('moments-viewer');
-  if(!photos.length){empty.style.display='block';viewer.style.display='none';return;}
-  empty.style.display='none';viewer.style.display='block';
-  const slidesEl=document.getElementById('slides');
-  slidesEl.innerHTML='';
-  photos.forEach((p,i)=>{
-    const s=document.createElement('div');s.className='slide';
-    s.innerHTML=`<img src="${p.url}" alt="moment ${i+1}" loading="lazy">
-    <button class="slide-del" onclick="deleteSlide('${p.id}')" title="삭제">×</button>
-    <div class="slide-caption">
-      ${p.author?`<div class="slide-author">${p.author}</div>`:''}
-      <div class="slide-comment">${p.comment||'&nbsp;'}</div>
+/* 그리드 렌더링 */
+function renderGrid(){
+  const grid=document.getElementById('m-grid');
+  const empty=document.getElementById('m-empty');
+  const limitEl=document.getElementById('m-limit');
+  if(limitEl)limitEl.textContent=momentsList.length+' / 10';
+
+  if(!momentsList.length){
+    grid.innerHTML='';
+    grid.style.display='none';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+  grid.style.display='flex';
+  grid.innerHTML=momentsList.map(p=>{
+    const ts=p.createdAt?.toDate?.()||new Date();
+    const timeStr=ts.toLocaleDateString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    return `<div class="m-card">
+      <img src="${p.url}" alt="moment" loading="lazy">
+      <div class="m-card-body">
+        <div class="m-card-author">${p.author||''}</div>
+        <div class="m-card-comment">${p.comment||'&nbsp;'}</div>
+        <div class="m-card-time">${timeStr}</div>
+      </div>
+      <button class="m-card-del" onclick="deleteMoment('${p.id}')" title="삭제">×</button>
     </div>`;
-    slidesEl.appendChild(s);
-  });
-  if(curSlide>=photos.length)curSlide=photos.length-1;
-  slidesEl.style.transform=`translateX(-${curSlide*100}%)`;
-  document.getElementById('slide-count').textContent=(curSlide+1)+' / '+photos.length;
-  const dotsEl=document.getElementById('slide-dots');
-  dotsEl.innerHTML=photos.map((_,i)=>`<div class="dot${i===curSlide?' active':''}" onclick="goSlide(${i})"></div>`).join('');
-  if(document.getElementById('moments-limit'))document.getElementById('moments-limit').textContent=photos.length+' / 10';
-  const addEl=document.getElementById('moments-add');
-  if(addEl)addEl.style.display=photos.length>=10?'none':'block';
+  }).join('');
 }
-
-function goSlide(i){curSlide=i;renderMoments();}
-function prevSlide(){if(photos.length<2)return;curSlide=(curSlide-1+photos.length)%photos.length;renderMoments();}
-function nextSlide(){if(photos.length<2)return;curSlide=(curSlide+1)%photos.length;renderMoments();}
-
-/* touch swipe */
-let tx=0;
-document.addEventListener('touchstart',e=>{if(e.target.closest('.slideshow-wrap'))tx=e.touches[0].clientX;},{passive:true});
-document.addEventListener('touchend',e=>{
-  if(!e.target.closest('.slideshow-wrap'))return;
-  const dx=e.changedTouches[0].clientX-tx;
-  if(Math.abs(dx)>40){dx<0?nextSlide():prevSlide();}
-},{passive:true});
 
 /* init */
 renderStay();renderFood();renderRoles();
