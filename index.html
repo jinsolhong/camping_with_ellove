@@ -183,17 +183,36 @@ input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
 .m-uploading.show{display:flex}
 .m-spinner{width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.m-grid{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.m-card{background:var(--bg2);display:flex;position:relative;transition:background 0.18s}
-.m-card:hover{background:var(--bg3)}
-.m-card img{width:110px;height:110px;object-fit:cover;flex-shrink:0;display:block}
-.m-card-body{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
+
+/* gallery grid */
+.m-grid{display:flex;flex-direction:column;gap:12px}
+.m-empty{background:var(--bg2);border:1px dashed var(--line2);border-radius:14px;padding:40px 20px;text-align:center;color:var(--text3);font-size:12px;line-height:1.9}
+
+/* group card */
+.m-card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative}
+.m-slider-wrap{position:relative;width:100%;overflow:hidden;touch-action:pan-y}
+.m-slider-track{display:flex;transition:transform 0.3s ease;will-change:transform}
+.m-slide{flex:0 0 100%;position:relative}
+.m-slide img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.m-slide-del{position:absolute;top:8px;right:8px;background:rgba(180,30,30,0.75);border:none;color:#fff;font-size:13px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.18s}
+.m-slide-del:hover{background:rgba(210,30,30,0.95)}
+/* prev/next arrows */
+.m-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.45);border:none;color:var(--text);font-size:16px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;transition:background 0.18s;-webkit-tap-highlight-color:transparent}
+.m-arrow:hover{background:rgba(0,0,0,0.7)}
+.m-arrow.prev{left:8px}
+.m-arrow.next{right:8px}
+/* dots */
+.m-dots{display:flex;justify-content:center;gap:5px;padding:8px 0 4px}
+.m-dot{width:6px;height:6px;border-radius:50%;background:var(--line3);cursor:pointer;transition:background 0.2s,transform 0.2s;border:none;padding:0}
+.m-dot.active{background:var(--accent);transform:scale(1.25)}
+/* card body */
+.m-card-body{padding:12px 16px 14px}
 .m-card-author{font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
 .m-card-comment{font-size:13px;color:var(--text2);line-height:1.6}
 .m-card-time{font-size:10px;color:var(--text3);margin-top:6px}
-.m-card-del{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.5);border:none;color:var(--text3);font-size:13px;width:24px;height:24px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s}
-.m-card-del:hover{background:rgba(160,30,30,0.75);color:#fff}
-.m-empty{background:var(--bg2);border:1px dashed var(--line2);border-radius:14px;padding:40px 20px;text-align:center;color:var(--text3);font-size:12px;line-height:1.9}
+/* delete all button */
+.m-card-delall{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.5);border:none;color:var(--text3);font-size:13px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;z-index:3}
+.m-card-delall:hover{background:rgba(160,30,30,0.75);color:#fff}
 </style>
 </head>
 <body>
@@ -556,6 +575,9 @@ async function submitMoment(){
 
   initFirebase();
 
+  /* 같은 업로드 배치를 하나의 그룹으로 묶기 위한 고유 ID */
+  const groupId = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+
   for(const file of toAdd){
     try{
       const fd=new FormData();
@@ -570,6 +592,7 @@ async function submitMoment(){
           url:data.secure_url,
           author:author,
           comment:comment||'',
+          groupId:groupId,
           createdAt:firebase.firestore.FieldValue.serverTimestamp()
         });
       }
@@ -589,12 +612,56 @@ async function submitMoment(){
   await loadPhotos();
 }
 
-/* 삭제 */
+/* 삭제 - 사진 한 장 */
 async function deleteMoment(id){
   if(!confirm('이 사진을 삭제할까요?'))return;
   initFirebase();
   if(db){try{await db.collection('moments').doc(id).delete();}catch(e){console.warn(e);}}
   await loadPhotos();
+}
+
+/* 삭제 - 그룹 전체 */
+async function deleteGroup(groupId){
+  if(!confirm('이 게시물 전체를 삭제할까요?'))return;
+  initFirebase();
+  if(db){
+    const toDelete=momentsList.filter(p=>p.groupId===groupId||(!p.groupId&&p.id===groupId));
+    for(const p of toDelete){
+      try{await db.collection('moments').doc(p.id).delete();}catch(e){console.warn(e);}
+    }
+  }
+  await loadPhotos();
+}
+
+/* 슬라이더 이동 */
+function slide(cardEl, dir){
+  const track=cardEl.querySelector('.m-slider-track');
+  const slides=track.querySelectorAll('.m-slide');
+  const dots=cardEl.querySelectorAll('.m-dot');
+  let cur=parseInt(track.dataset.cur||'0');
+  cur=(cur+dir+slides.length)%slides.length;
+  track.dataset.cur=cur;
+  track.style.transform=`translateX(-${cur*100}%)`;
+  dots.forEach((d,i)=>d.classList.toggle('active',i===cur));
+}
+
+function slideTo(cardEl, idx){
+  const track=cardEl.querySelector('.m-slider-track');
+  const dots=cardEl.querySelectorAll('.m-dot');
+  track.dataset.cur=idx;
+  track.style.transform=`translateX(-${idx*100}%)`;
+  dots.forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+/* touch swipe */
+function initSwipe(cardEl){
+  const track=cardEl.querySelector('.m-slider-track');
+  let sx=0;
+  track.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+  track.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    if(Math.abs(dx)>40) slide(cardEl,dx<0?1:-1);
+  },{passive:true});
 }
 
 /* 그리드 렌더링 */
@@ -612,19 +679,56 @@ function renderGrid(){
   }
   empty.style.display='none';
   grid.style.display='flex';
-  grid.innerHTML=momentsList.map(p=>{
-    const ts=p.createdAt?.toDate?.()||new Date();
+
+  /* 그룹으로 묶기 */
+  const groupMap=new Map();
+  momentsList.forEach(p=>{
+    const key=p.groupId||p.id; /* groupId 없는 구형 데이터는 id로 분리 처리 */
+    if(!groupMap.has(key)) groupMap.set(key,{photos:[],author:p.author,comment:p.comment,createdAt:p.createdAt});
+    groupMap.get(key).photos.push(p);
+  });
+
+  grid.innerHTML='';
+  groupMap.forEach((grp,gkey)=>{
+    const photos=grp.photos;
+    const ts=grp.createdAt?.toDate?.()||new Date();
     const timeStr=ts.toLocaleDateString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    return `<div class="m-card">
-      <img src="${p.url}" alt="moment" loading="lazy">
-      <div class="m-card-body">
-        <div class="m-card-author">${p.author||''}</div>
-        <div class="m-card-comment">${p.comment||'&nbsp;'}</div>
-        <div class="m-card-time">${timeStr}</div>
+    const multi=photos.length>1;
+
+    const card=document.createElement('div');
+    card.className='m-card';
+
+    /* slides */
+    const slidesHtml=photos.map(p=>`
+      <div class="m-slide">
+        <img src="${p.url}" alt="moment" loading="lazy">
+        <button class="m-slide-del" onclick="deleteMoment('${p.id}')" title="이 사진 삭제">×</button>
+      </div>`).join('');
+
+    /* dots */
+    const dotsHtml=multi?`<div class="m-dots">${photos.map((_,i)=>`<button class="m-dot${i===0?' active':''}" onclick="slideTo(this.closest('.m-card'),${i})"></button>`).join('')}</div>`:'';
+
+    /* arrows */
+    const arrowsHtml=multi?`
+      <button class="m-arrow prev" onclick="slide(this.closest('.m-card'),-1)">&#8249;</button>
+      <button class="m-arrow next" onclick="slide(this.closest('.m-card'),1)">&#8250;</button>`:'';
+
+    card.innerHTML=`
+      <div class="m-slider-wrap">
+        <div class="m-slider-track" data-cur="0">${slidesHtml}</div>
+        ${arrowsHtml}
       </div>
-      <button class="m-card-del" onclick="deleteMoment('${p.id}')" title="삭제">×</button>
-    </div>`;
-  }).join('');
+      ${dotsHtml}
+      <div class="m-card-body">
+        <div class="m-card-author">${grp.author||''}</div>
+        <div class="m-card-comment">${grp.comment||'&nbsp;'}</div>
+        <div class="m-card-time">${timeStr}${multi?` · ${photos.length}장`:''}</div>
+      </div>
+      <button class="m-card-delall" onclick="deleteGroup('${gkey}')" title="게시물 삭제">×</button>`;
+
+    grid.appendChild(card);
+    initSwipe(card);
+  });
 }
 
 /* init */
