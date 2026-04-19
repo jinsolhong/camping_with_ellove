@@ -185,34 +185,40 @@ input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* gallery grid */
-.m-grid{display:flex;flex-direction:column;gap:12px}
+.m-grid{display:flex;flex-direction:column;gap:14px}
 .m-empty{background:var(--bg2);border:1px dashed var(--line2);border-radius:14px;padding:40px 20px;text-align:center;color:var(--text3);font-size:12px;line-height:1.9}
 
 /* group card */
 .m-card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative}
+
+/* slider */
 .m-slider-wrap{position:relative;width:100%;overflow:hidden;touch-action:pan-y}
-.m-slider-track{display:flex;transition:transform 0.3s ease;will-change:transform}
+.m-slider-track{display:flex;transition:transform 0.32s ease;will-change:transform}
 .m-slide{flex:0 0 100%;position:relative}
 .m-slide img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-.m-slide-del{position:absolute;top:8px;right:8px;background:rgba(180,30,30,0.75);border:none;color:#fff;font-size:13px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.18s}
+.m-slide-del{position:absolute;top:8px;right:8px;background:rgba(180,30,30,0.72);border:none;color:#fff;font-size:14px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.18s;z-index:2}
 .m-slide-del:hover{background:rgba(210,30,30,0.95)}
-/* prev/next arrows */
-.m-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.45);border:none;color:var(--text);font-size:16px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;transition:background 0.18s;-webkit-tap-highlight-color:transparent}
-.m-arrow:hover{background:rgba(0,0,0,0.7)}
+
+/* arrows */
+.m-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.42);border:none;color:#fff;font-size:18px;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;transition:background 0.18s;-webkit-tap-highlight-color:transparent;line-height:1}
+.m-arrow:hover{background:rgba(0,0,0,0.68)}
 .m-arrow.prev{left:8px}
 .m-arrow.next{right:8px}
+
 /* dots */
-.m-dots{display:flex;justify-content:center;gap:5px;padding:8px 0 4px}
-.m-dot{width:6px;height:6px;border-radius:50%;background:var(--line3);cursor:pointer;transition:background 0.2s,transform 0.2s;border:none;padding:0}
-.m-dot.active{background:var(--accent);transform:scale(1.25)}
+.m-dots{display:flex;justify-content:center;gap:5px;padding:8px 0 2px}
+.m-dot{width:6px;height:6px;border-radius:50%;background:var(--line3);cursor:pointer;transition:background 0.2s,transform 0.2s;border:none;padding:0;flex-shrink:0}
+.m-dot.active{background:var(--accent);transform:scale(1.3)}
+
 /* card body */
 .m-card-body{padding:12px 16px 14px}
 .m-card-author{font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
 .m-card-comment{font-size:13px;color:var(--text2);line-height:1.6}
 .m-card-time{font-size:10px;color:var(--text3);margin-top:6px}
-/* delete all button */
-.m-card-delall{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.5);border:none;color:var(--text3);font-size:13px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;z-index:3}
-.m-card-delall:hover{background:rgba(160,30,30,0.75);color:#fff}
+
+/* delete-all button */
+.m-card-delall{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.48);border:none;color:var(--text2);font-size:14px;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;z-index:3}
+.m-card-delall:hover{background:rgba(160,30,30,0.8);color:#fff}
 </style>
 </head>
 <body>
@@ -398,14 +404,42 @@ function go(t){
   document.getElementById('page-'+t).classList.add('active');
   if(t==='crew')renderCrew();
   if(t==='moments')loadPhotos();
-  if(t==='moments'){loadPhotos();}
 }
-function rls(k,d){try{return JSON.parse(localStorage.getItem(k)||d);}catch(e){return JSON.parse(d);}}
-function wls(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 
+/* ── FIRESTORE 실시간 동기화 ── */
+let sv={};  // 숙소 투표
+let fv={};  // 음식 투표
+let roles={driver:[],meal:[],cafe:[]};  // 역할
+const rcls={driver:'rc-driver',meal:'rc-meal',cafe:'rc-cafe'};
+
+function initFirebaseAndListen(){
+  if(db)return;
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db=firebase.firestore();
+  }catch(e){console.warn('Firebase init fail',e);return;}
+
+  // 숙소 투표 실시간 구독
+  db.collection('votes').doc('stay').onSnapshot(doc=>{
+    sv = doc.exists ? (doc.data()||{}) : {};
+    renderStay();
+  },e=>console.warn('stay vote listen err',e));
+
+  // 음식 투표 실시간 구독
+  db.collection('votes').doc('food').onSnapshot(doc=>{
+    fv = doc.exists ? (doc.data()||{}) : {};
+    renderFood();
+  },e=>console.warn('food vote listen err',e));
+
+  // 역할 실시간 구독
+  db.collection('votes').doc('roles').onSnapshot(doc=>{
+    roles = doc.exists ? Object.assign({driver:[],meal:[],cafe:[]}, doc.data()) : {driver:[],meal:[],cafe:[]};
+    renderRoles();
+  },e=>console.warn('roles listen err',e));
+}
+
 /* ── STAY VOTE ── */
-let sv=rls('rn4_sv','{}');
 function renderStay(){
   const g=document.getElementById('stay-grid');g.innerHTML='';
   PLACES.forEach(p=>{
@@ -431,13 +465,23 @@ function renderStay(){
   });
   updateStaySum();
 }
-function addSV(pid){const el=document.getElementById('si-'+pid);const n=el.value.trim();if(!n)return;if(!sv[pid])sv[pid]=[];sv[pid].push(n);el.value='';wls('rn4_sv',sv);renderStay();}
-function rmSV(pid,n){if(!sv[pid])return;const i=sv[pid].indexOf(n);if(i>-1)sv[pid].splice(i,1);wls('rn4_sv',sv);renderStay();}
+async function addSV(pid){
+  const el=document.getElementById('si-'+pid);const n=el.value.trim();if(!n)return;
+  el.value='';
+  const cur=sv[pid]||[];
+  const upd={...sv,[pid]:[...cur,n]};
+  try{await db.collection('votes').doc('stay').set(upd);}catch(e){console.warn(e);}
+}
+async function rmSV(pid,n){
+  const cur=(sv[pid]||[]);const i=cur.indexOf(n);if(i<0)return;
+  const next=[...cur];next.splice(i,1);
+  const upd={...sv,[pid]:next};
+  try{await db.collection('votes').doc('stay').set(upd);}catch(e){console.warn(e);}
+}
 function updateStaySum(){const tots=PLACES.map(p=>({p,c:(sv[p.id]||[]).length}));const tot=tots.reduce((a,b)=>a+b.c,0);const s=document.getElementById('stay-sum');if(!tot){s.style.display='none';return;}s.style.display='flex';const best=[...tots].sort((a,b)=>b.c-a.c)[0];document.getElementById('stay-lead').textContent=best.p.name+' ('+best.c+'표)';}
-function rstStay(){sv={};wls('rn4_sv',sv);renderStay();}
+async function rstStay(){try{await db.collection('votes').doc('stay').set({});}catch(e){console.warn(e);}}
 
 /* ── FOOD VOTE ── */
-let fv=rls('rn4_fv','{}');
 function renderFood(){
   const g=document.getElementById('food-grid');g.innerHTML='';
   FOOD.forEach(p=>{
@@ -452,14 +496,23 @@ function renderFood(){
   });
   updateFoodSum();
 }
-function addFV(pid){const el=document.getElementById('fi-'+pid);const n=el.value.trim();if(!n)return;if(!fv[pid])fv[pid]=[];fv[pid].push(n);el.value='';wls('rn4_fv',fv);renderFood();}
-function rmFV(pid,n){if(!fv[pid])return;const i=fv[pid].indexOf(n);if(i>-1)fv[pid].splice(i,1);wls('rn4_fv',fv);renderFood();}
+async function addFV(pid){
+  const el=document.getElementById('fi-'+pid);const n=el.value.trim();if(!n)return;
+  el.value='';
+  const cur=fv[pid]||[];
+  const upd={...fv,[pid]:[...cur,n]};
+  try{await db.collection('votes').doc('food').set(upd);}catch(e){console.warn(e);}
+}
+async function rmFV(pid,n){
+  const cur=(fv[pid]||[]);const i=cur.indexOf(n);if(i<0)return;
+  const next=[...cur];next.splice(i,1);
+  const upd={...fv,[pid]:next};
+  try{await db.collection('votes').doc('food').set(upd);}catch(e){console.warn(e);}
+}
 function updateFoodSum(){const tots=FOOD.map(p=>({p,c:(fv[p.id]||[]).length}));const tot=tots.reduce((a,b)=>a+b.c,0);const s=document.getElementById('food-sum');if(!tot){s.style.display='none';return;}s.style.display='flex';const best=[...tots].sort((a,b)=>b.c-a.c)[0];document.getElementById('food-lead').textContent=best.p.name+' ('+best.c+'표)';}
-function rstFood(){fv={};wls('rn4_fv',fv);renderFood();}
+async function rstFood(){try{await db.collection('votes').doc('food').set({});}catch(e){console.warn(e);}}
 
 /* ── ROLES ── */
-let roles=rls('rn4_roles','{"driver":[],"meal":[],"cafe":[]}');
-const rcls={driver:'rc-driver',meal:'rc-meal',cafe:'rc-cafe'};
 function renderRoles(){
   ['driver','meal','cafe'].forEach(type=>{
     const el=document.getElementById('chips-'+type);if(!el)return;
@@ -467,16 +520,26 @@ function renderRoles(){
   });
   renderCrew();
 }
-function addRole(type){const el=document.getElementById('inp-'+type);const n=el.value.trim();if(!n)return;if(!roles[type])roles[type]=[];roles[type].push(n);el.value='';wls('rn4_roles',roles);renderRoles();}
-function rmRole(type,n){if(!roles[type])return;const i=roles[type].indexOf(n);if(i>-1)roles[type].splice(i,1);wls('rn4_roles',roles);renderRoles();}
+async function addRole(type){
+  const el=document.getElementById('inp-'+type);const n=el.value.trim();if(!n)return;
+  el.value='';
+  const cur=roles[type]||[];
+  const upd={...roles,[type]:[...cur,n]};
+  try{await db.collection('votes').doc('roles').set(upd);}catch(e){console.warn(e);}
+}
+async function rmRole(type,n){
+  const cur=(roles[type]||[]);const i=cur.indexOf(n);if(i<0)return;
+  const next=[...cur];next.splice(i,1);
+  const upd={...roles,[type]:next};
+  try{await db.collection('votes').doc('roles').set(upd);}catch(e){console.warn(e);}
 
 /* ── CREW ── */
 function getCrewTags(name){
-  const tags=[];const r=rls('rn4_roles','{"driver":[],"meal":[],"cafe":[]}');
+  const tags=[];
   if(name==='홍진솔') tags.push({label:'저녁 부담',cls:'b-green'});
-  if((r.driver||[]).includes(name)) tags.push({label:'운전',cls:'b-amber'});
-  if((r.meal||[]).includes(name)) tags.push({label:'점심',cls:'b-blue'});
-  if((r.cafe||[]).includes(name)) tags.push({label:'카페',cls:'b-pink'});
+  if((roles.driver||[]).includes(name)) tags.push({label:'운전',cls:'b-amber'});
+  if((roles.meal||[]).includes(name)) tags.push({label:'점심',cls:'b-blue'});
+  if((roles.cafe||[]).includes(name)) tags.push({label:'카페',cls:'b-pink'});
   return tags;
 }
 function renderCrew(){
@@ -575,7 +638,7 @@ async function submitMoment(){
 
   initFirebase();
 
-  /* 같은 업로드 배치를 하나의 그룹으로 묶기 위한 고유 ID */
+/* 같은 배치를 하나의 그룹으로 묶기 위한 고유 ID */
   const groupId = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 
   for(const file of toAdd){
@@ -625,42 +688,39 @@ async function deleteGroup(groupId){
   if(!confirm('이 게시물 전체를 삭제할까요?'))return;
   initFirebase();
   if(db){
-    const toDelete=momentsList.filter(p=>p.groupId===groupId||(!p.groupId&&p.id===groupId));
-    for(const p of toDelete){
-      try{await db.collection('moments').doc(p.id).delete();}catch(e){console.warn(e);}
-    }
+    const toDelete=momentsList.filter(p=>(p.groupId||p.id)===groupId);
+    for(const p of toDelete){try{await db.collection('moments').doc(p.id).delete();}catch(e){console.warn(e);}}
   }
   await loadPhotos();
 }
 
 /* 슬라이더 이동 */
-function slide(cardEl, dir){
+function slide(cardEl,dir){
   const track=cardEl.querySelector('.m-slider-track');
-  const slides=track.querySelectorAll('.m-slide');
-  const dots=cardEl.querySelectorAll('.m-dot');
+  const count=track.querySelectorAll('.m-slide').length;
   let cur=parseInt(track.dataset.cur||'0');
-  cur=(cur+dir+slides.length)%slides.length;
-  track.dataset.cur=cur;
-  track.style.transform=`translateX(-${cur*100}%)`;
-  dots.forEach((d,i)=>d.classList.toggle('active',i===cur));
+  cur=(cur+dir+count)%count;
+  _slideTo(track,cur);
 }
-
-function slideTo(cardEl, idx){
+function slideTo(cardEl,idx){
   const track=cardEl.querySelector('.m-slider-track');
-  const dots=cardEl.querySelectorAll('.m-dot');
+  _slideTo(track,idx);
+}
+function _slideTo(track,idx){
   track.dataset.cur=idx;
   track.style.transform=`translateX(-${idx*100}%)`;
-  dots.forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const card=track.closest('.m-card');
+  card.querySelectorAll('.m-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
 }
 
-/* touch swipe */
+/* 터치 스와이프 */
 function initSwipe(cardEl){
   const track=cardEl.querySelector('.m-slider-track');
   let sx=0;
   track.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
   track.addEventListener('touchend',e=>{
     const dx=e.changedTouches[0].clientX-sx;
-    if(Math.abs(dx)>40) slide(cardEl,dx<0?1:-1);
+    if(Math.abs(dx)>40)slide(cardEl,dx<0?1:-1);
   },{passive:true});
 }
 
@@ -683,8 +743,8 @@ function renderGrid(){
   /* 그룹으로 묶기 */
   const groupMap=new Map();
   momentsList.forEach(p=>{
-    const key=p.groupId||p.id; /* groupId 없는 구형 데이터는 id로 분리 처리 */
-    if(!groupMap.has(key)) groupMap.set(key,{photos:[],author:p.author,comment:p.comment,createdAt:p.createdAt});
+    const key=p.groupId||p.id;
+    if(!groupMap.has(key))groupMap.set(key,{photos:[],author:p.author,comment:p.comment,createdAt:p.createdAt});
     groupMap.get(key).photos.push(p);
   });
 
@@ -698,20 +758,14 @@ function renderGrid(){
     const card=document.createElement('div');
     card.className='m-card';
 
-    /* slides */
     const slidesHtml=photos.map(p=>`
       <div class="m-slide">
         <img src="${p.url}" alt="moment" loading="lazy">
         <button class="m-slide-del" onclick="deleteMoment('${p.id}')" title="이 사진 삭제">×</button>
       </div>`).join('');
 
-    /* dots */
     const dotsHtml=multi?`<div class="m-dots">${photos.map((_,i)=>`<button class="m-dot${i===0?' active':''}" onclick="slideTo(this.closest('.m-card'),${i})"></button>`).join('')}</div>`:'';
-
-    /* arrows */
-    const arrowsHtml=multi?`
-      <button class="m-arrow prev" onclick="slide(this.closest('.m-card'),-1)">&#8249;</button>
-      <button class="m-arrow next" onclick="slide(this.closest('.m-card'),1)">&#8250;</button>`:'';
+    const arrowsHtml=multi?`<button class="m-arrow prev" onclick="slide(this.closest('.m-card'),-1)">&#8249;</button><button class="m-arrow next" onclick="slide(this.closest('.m-card'),1)">&#8250;</button>`:'';
 
     card.innerHTML=`
       <div class="m-slider-wrap">
@@ -722,7 +776,7 @@ function renderGrid(){
       <div class="m-card-body">
         <div class="m-card-author">${grp.author||''}</div>
         <div class="m-card-comment">${grp.comment||'&nbsp;'}</div>
-        <div class="m-card-time">${timeStr}${multi?` · ${photos.length}장`:''}</div>
+        <div class="m-card-time">${timeStr}${multi?' · '+photos.length+'장':''}</div>
       </div>
       <button class="m-card-delall" onclick="deleteGroup('${gkey}')" title="게시물 삭제">×</button>`;
 
@@ -732,6 +786,7 @@ function renderGrid(){
 }
 
 /* init */
+initFirebaseAndListen();
 renderStay();renderFood();renderRoles();
 </script>
 </body>
