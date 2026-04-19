@@ -532,6 +532,7 @@ async function rmRole(type,n){
   const next=[...cur];next.splice(i,1);
   const upd={...roles,[type]:next};
   try{await db.collection('votes').doc('roles').set(upd);}catch(e){console.warn(e);}
+}
 
 /* ── CREW ── */
 function getCrewTags(name){
